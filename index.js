@@ -18,6 +18,8 @@ async function run(){
         await client.connect();
         const database = client.db("heroRunner");
         const productsCollection = database.collection("products");
+        const ordersCollection = database.collection("orders");
+        const reviewsCollection = database.collection("reviews");
 
         //GET API
         app.get('/products', async(req, res) => {
@@ -31,6 +33,43 @@ async function run(){
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
             const result = await productsCollection.findOne(query);
+            res.send(result);
+        });
+
+        // POST orders
+        app.post('/orders', async(req, res) => {
+            const order = req.body;
+            const result = await ordersCollection.insertOne(order);
+            res.json(result);
+        })
+
+        // get email specific product
+        app.get('/orders/:email', async(req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const filter = {email: email};
+            const result = await ordersCollection.find(filter).toArray();
+            res.send(result);
+        });
+
+        // delete an order
+        app.delete('/orders/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await ordersCollection.deleteOne(query);
+            res.json(result);
+        });
+
+        // post a review
+        app.post('/review', async(req, res) => {
+            const review = req.body;
+            const result = await reviewsCollection.insertOne(review);
+            res.json(result);
+        });
+        // get all review
+        app.get('/review', async(req, res) => {
+            const reviews = reviewsCollection.find({});
+            const result = await reviews.toArray();
             res.send(result);
         })
     }
